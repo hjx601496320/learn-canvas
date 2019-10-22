@@ -1,0 +1,90 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>画一个钟表</title>
+    <style>
+        canvas {
+            border: 2px solid black;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+    //绘制画布
+    var canvas = document.getElementById('canvas');
+    canvas.height = window.innerHeight - 20;
+    canvas.width = window.innerWidth - 20;
+    //获取上下文
+    var context = canvas.getContext('2d');
+
+    //开始画一个钟表
+    var r = 100;
+
+    function drawClock() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        var date = new Date();
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        var seconds = date.getSeconds();
+        var x = r * 2;
+        var y = x;
+        var PI2 = Math.PI * 2;
+        //画一个表盘
+        context.beginPath();
+        context.arc(x, y, r, 0, PI2, true);
+        context.stroke();
+        //表中间的远点
+        context.beginPath();
+        context.arc(x, y, 5, 0, PI2, true);
+        context.stroke();
+        context.fill();
+        //表上显示的时间刻度
+        var numerals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+        numerals.forEach(function (numeral) {
+            //因为角度从3点钟方向开始, 所以需要减去3
+            var angle = PI2 / 12 * (numeral - 3);
+            context.beginPath();
+            context.arc(
+                x + Math.cos(angle) * (r - 10),
+                y + Math.sin(angle) * (r - 10),
+                3, 0, PI2, true);
+            context.stroke();
+            context.fill();
+        });
+        //表上的秒针
+        var secondAngle = PI2 * seconds / 60 - PI2 / 4;
+        context.moveTo(x, y);
+        context.lineTo(
+            x + Math.cos(secondAngle) * (r),
+            y + Math.sin(secondAngle) * (r)
+        );
+        context.stroke();
+        //表上的分针
+        var minuteAngle = PI2 * minutes / 60 - PI2 / 4;
+        context.moveTo(x, y);
+        context.lineTo(
+            x + Math.cos(minuteAngle) * (r - 15),
+            y + Math.sin(minuteAngle) * (r - 15)
+        );
+        context.stroke();
+        //表上的时针
+        var hourAngle = PI2 * hours / 60 - PI2 / 4;
+        //加上分钟的偏移量
+        hourAngle += hourAngle / 60 * minutes;
+        context.moveTo(x, y);
+        context.lineTo(
+            x + Math.cos(hourAngle) * (r - 30),
+            y + Math.sin(hourAngle) * (r - 30)
+        );
+        context.stroke();
+    }
+
+    //开始执行
+    setInterval(drawClock, 1000);
+
+
+</script>
+</body>
+</html>

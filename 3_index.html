@@ -1,0 +1,80 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>画一个选取框</title>
+    <style>
+        canvas {
+            border: 2px solid black;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+    //绘制画布
+    var canvas = document.getElementById('canvas');
+    canvas.height = window.innerHeight - 20;
+    canvas.width = window.innerWidth - 20;
+    //获取上下文
+    var context = canvas.getContext('2d');
+
+    var box = {
+        x: 0,
+        y: 0,
+        x1: 0,
+        y1: 0,
+        draw: false
+    };
+
+    //监控鼠标移动
+    canvas.onmousemove = function (event) {
+        var xy = window2canvas(canvas, event.clientX, event.clientY);
+        if (box.draw) {
+            box.x1 = xy.x;
+            box.y1 = xy.y;
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            drawBox(context, box);
+        } else {
+            box.x = xy.x;
+            box.y = xy.y;
+        }
+    };
+    //监控鼠标点击
+    canvas.onmousedown = function (event) {
+        box.draw = true;
+    };
+    //鼠标按键松开
+    canvas.onmouseup = function (event) {
+        box.draw = false;
+        context.clearRect(0, 0, canvas.width, canvas.height);
+    };
+
+    function drawBox(context, box) {
+        context.beginPath();
+        context.moveTo(box.x, box.y);
+        context.lineTo(box.x1, box.y);
+        context.lineTo(box.x1, box.y1);
+        context.lineTo(box.x, box.y1);
+        context.lineTo(box.x, box.y);
+        context.stroke();
+    }
+
+    /**
+     *重新计算鼠标的坐标
+     * @param canvas
+     * @param x
+     * @param y
+     * @returns {{x: number, y: number}}
+     */
+    function window2canvas(canvas, x, y) {
+        var clientRect = canvas.getBoundingClientRect();
+        return {
+            x: (x - clientRect.left) * (canvas.width / clientRect.width),
+            y: (y - clientRect.top) * (canvas.height / clientRect.height),
+        };
+    }
+
+</script>
+</body>
+</html>

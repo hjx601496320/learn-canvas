@@ -1,0 +1,155 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>画一个子弹, 并射击到鼠标位置</title>
+    <style>
+        canvas {
+            border: 2px solid black;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+    //绘制画布
+    var canvas = document.getElementById('canvas');
+    canvas.height = window.innerHeight - 20;
+    canvas.width = window.innerWidth - 20;
+    //获取上下文
+    var context = canvas.getContext('2d');
+
+    //屏幕上的子弹
+    var shots = [];
+
+    //监控鼠标点击
+    canvas.onmousedown = function (event) {
+        var xy = window2canvas(canvas, event.clientX, event.clientY);
+        var shot = Shot(context, canvas.width / 2, canvas.height / 2, 10, xy.x, xy.y);
+        shot.move();
+        shots.push(shot);
+    };
+
+    setInterval(function () {
+        //清理画布上的图像
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.fillText("大炮", canvas.width / 2, canvas.height / 2);
+        shots.forEach(function (obj, index) {
+            if (obj.isEdge) {
+                return;
+            }
+            obj.move();
+        })
+    }, 1000 / 25);
+
+    /**
+     *重新计算鼠标的坐标
+     * @param canvas
+     * @param x
+     * @param y
+     * @returns {{x: number, y: number}}
+     */
+    function window2canvas(canvas, x, y) {
+        var clientRect = canvas.getBoundingClientRect();
+        return {
+            x: (x - clientRect.left) * (canvas.width / clientRect.width),
+            y: (y - clientRect.top) * (canvas.height / clientRect.height),
+        };
+    }
+
+    /**
+     *
+     * @param context
+     * @param x 起点
+     * @param y
+     * @param s 速度
+     * @param x1 终点
+     * @param y1
+     * @returns {{move: move, s: *, x: *, y1: *, show: show, y: *, x1: *, angle: number}}
+     * @constructor
+     */
+    function Shot(context, x, y, s, x1, y1) {
+        var p = pointRelationship(x, y, x1, y1);
+        return {
+            context: context,
+            x: x,//x
+            y: y,//y
+            angle: p.angle,
+            s: s,//速度
+            isEdge: false,
+            move: function () {
+                this.x = this.x + Math.cos(Math.PI / 180 * this.angle) * (this.s);
+                this.y = this.y + Math.sin(Math.PI / 180 * this.angle) * (this.s);
+                this.show();
+            },
+            show: function () {
+                this.isEdge = edge(canvas, this.x, this.y);
+                this.context.beginPath();
+                this.context.arc(this.x, this.y, 3, 0, Math.PI * 2, true);
+                this.context.stroke();
+            }
+        }
+    }
+
+    /**
+     * 点与点的关系
+     * @param x
+     * @param y
+     * @param x1
+     * @param y1
+     * @returns {{distance: number, angle: number}}
+     */
+    function pointRelationship(x, y, x1, y1) {
+        var x = x1 - x;
+        var y = y1 - y;
+        //斜边长度
+        var distance = Math.sqrt(Math.pow(Math.abs(x), 2) + Math.pow(Math.abs(y), 2));
+        var angle = Math.asin(Math.abs(y) / distance) * 180 / Math.PI
+        //转换角度
+        if (x > 0 && y > 0) {
+            angle = angle;
+        } else if (x == 0 && y > 0) {
+            angle = 90;
+        } else if (x < 0 && y > 0) {
+            angle = 180 - angle;
+        } else if (x < 0 && y == 0) {
+            angle = 180;
+        } else if (x < 0 && y < 0) {
+            angle = 180 + angle;
+        } else if (x == 0 && y < 0) {
+            angle = 270;
+        } else if (x > 0 && y < 0) {
+            angle = 360 - angle;
+        }
+        return {
+            angle: angle,
+            distance: distance
+        }
+    }
+
+    /**
+     * 是否是边界
+     * @param canvas
+     * @param x
+     * @param y
+     * @returns {boolean}
+     */
+    function edge(canvas, x, y) {
+        //边界控制
+        if (x < 0) {
+            return true;
+        }
+        if (x > canvas.width) {
+            return true;
+        }
+        if (y < 0) {
+            return true;
+        }
+        if (y > canvas.height) {
+            return true;
+        }
+        return false;
+    }
+</script>
+</body>
+</html>
