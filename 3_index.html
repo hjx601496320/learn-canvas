@@ -1,8 +1,12 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>画一个选取框</title>
+    <title>一个简单的画板</title>
     <style>
+        .tile {
+            float: left;
+        }
+
         canvas {
             border: 2px solid black;
             margin: auto;
@@ -10,7 +14,15 @@
     </style>
 </head>
 <body>
-<canvas id="canvas"></canvas>
+<div class="tile">
+    <button class="tile" onclick="clearCanvas()">清空</button>
+    <button class="tile" onclick="panColor('#ff0522')">红色</button>
+    <button class="tile" onclick="panColor('#000000')">黑色</button>
+    <button class="tile" onclick="panColor('#ffffff')">白色</button>
+    <button class="tile" onclick="panWidth(10)">画笔变粗</button>
+    <button class="tile" onclick="panWidth(-10)">画笔变细</button>
+</div>
+<canvas id="canvas" class="tile"></canvas>
 <script>
     //绘制画布
     var canvas = document.getElementById('canvas');
@@ -19,46 +31,33 @@
     //获取上下文
     var context = canvas.getContext('2d');
 
-    var box = {
-        x: 0,
-        y: 0,
-        x1: 0,
-        y1: 0,
-        draw: false
+
+    var pan = {
+        draw: false,
+        color: "#000000",
+        width: 10
     };
 
     //监控鼠标移动
     canvas.onmousemove = function (event) {
         var xy = window2canvas(canvas, event.clientX, event.clientY);
-        if (box.draw) {
-            box.x1 = xy.x;
-            box.y1 = xy.y;
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            drawBox(context, box);
-        } else {
-            box.x = xy.x;
-            box.y = xy.y;
+        context.strokeStyle = pan.color;
+        context.lineWidth = pan.width;
+        if (pan.draw) {
+            context.lineTo(xy.x, xy.y);
+            context.stroke();
         }
+
     };
     //监控鼠标点击
     canvas.onmousedown = function (event) {
-        box.draw = true;
+        pan.draw = true;
+        context.beginPath();
     };
     //鼠标按键松开
     canvas.onmouseup = function (event) {
-        box.draw = false;
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        pan.draw = false;
     };
-
-    function drawBox(context, box) {
-        context.beginPath();
-        context.moveTo(box.x, box.y);
-        context.lineTo(box.x1, box.y);
-        context.lineTo(box.x1, box.y1);
-        context.lineTo(box.x, box.y1);
-        context.lineTo(box.x, box.y);
-        context.stroke();
-    }
 
     /**
      *重新计算鼠标的坐标
@@ -73,6 +72,24 @@
             x: (x - clientRect.left) * (canvas.width / clientRect.width),
             y: (y - clientRect.top) * (canvas.height / clientRect.height),
         };
+    }
+
+    //清空画布
+    function clearCanvas() {
+        context.clearRect(0, 0, canvas.width, canvas.height)
+    }
+
+    //画笔颜色
+    function panColor(color) {
+        pan.color = color;
+    }
+
+    //画笔粗细
+    function panWidth(width) {
+        pan.width = pan.width + width;
+        if (pan.width <= 0) {
+            pan.width = 1;
+        }
     }
 
 </script>
