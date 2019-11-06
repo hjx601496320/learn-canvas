@@ -3,94 +3,136 @@
     <meta charset="UTF-8">
     <title>一个简单的画板</title>
     <style>
-        .tile {
+        body {
+            width: 90%;
+            margin: auto;
+            border: black solid;
+        }
+
+        .left {
+            width: 10%;
             float: left;
         }
 
+        .right {
+            width: 90%;
+            float: right;
+        }
+
+        .btn {
+            margin: 2px;
+            width: 90%;
+            background-color: #ffffff;
+        }
+
+        .panColor {
+            width: 30%;
+
+        }
+
         canvas {
-            border: 2px solid black;
+            border: 1px solid black;
             margin: auto;
         }
     </style>
 </head>
 <body>
-<div class="tile">
-    <button class="tile" onclick="clearCanvas()">清空</button>
-    <button class="tile" onclick="panColor('#ff0522')">红色</button>
-    <button class="tile" onclick="panColor('#000000')">黑色</button>
-    <button class="tile" onclick="panColor('#ffffff')">白色</button>
-    <button class="tile" onclick="panWidth(10)">画笔变粗</button>
-    <button class="tile" onclick="panWidth(-10)">画笔变细</button>
+
+<div class="left">
+    <button class="btn clear">清空</button>
+    <button class="btn panColor" style="background-color: #ffffff">&nbsp;</button>
+    <button class="btn panColor" style="background-color: #000000">&nbsp;</button>
+    <button class="btn panColor" style="background-color: #ff0522">&nbsp;</button>
+    <button class="btn panColor" style="background-color: #ffff00">&nbsp;</button>
+    <button class="btn panColor" style="background-color: #01ff00">&nbsp;</button>
+    <button class="btn panColor" style="background-color: #000aff">&nbsp;</button>
+    <button class="btn changeWidth" width="5">画笔变粗</button>
+    <button class="btn changeWidth" width="-5">画笔变细</button>
 </div>
-<canvas id="canvas" class="tile"></canvas>
+<div class="right">
+    <canvas id="canvas" class="tile"></canvas>
+</div>
+　
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 <script>
-    //绘制画布
-    var canvas = document.getElementById('canvas');
-    canvas.height = window.innerHeight - 20;
-    canvas.width = window.innerWidth - 20;
-    //获取上下文
-    var context = canvas.getContext('2d');
+    $(function () {
+        $('.panColor').each(function () {
+            var color = $(this).attr("color");
+            $(this).css("background-color", color);
+        });
+
+        var right = document.querySelector('.right');
+        //绘制画布
+        var canvas = document.getElementById('canvas');
+        canvas.height = window.innerHeight - 5;
+        canvas.width = right.offsetWidth - 2;
+        //获取上下文
+        var context = canvas.getContext('2d');
 
 
-    var pan = {
-        draw: false,
-        color: "#000000",
-        width: 10
-    };
-
-    //监控鼠标移动
-    canvas.onmousemove = function (event) {
-        var xy = window2canvas(canvas, event.clientX, event.clientY);
-        context.strokeStyle = pan.color;
-        context.lineWidth = pan.width;
-        if (pan.draw) {
-            context.lineTo(xy.x, xy.y);
-            context.stroke();
-        }
-
-    };
-    //监控鼠标点击
-    canvas.onmousedown = function (event) {
-        pan.draw = true;
-        context.beginPath();
-    };
-    //鼠标按键松开
-    canvas.onmouseup = function (event) {
-        pan.draw = false;
-    };
-
-    /**
-     *重新计算鼠标的坐标
-     * @param canvas
-     * @param x
-     * @param y
-     * @returns {{x: number, y: number}}
-     */
-    function window2canvas(canvas, x, y) {
-        var clientRect = canvas.getBoundingClientRect();
-        return {
-            x: (x - clientRect.left) * (canvas.width / clientRect.width),
-            y: (y - clientRect.top) * (canvas.height / clientRect.height),
+        var pan = {
+            draw: false,
+            color: "#000000",
+            width: 10
         };
-    }
 
-    //清空画布
-    function clearCanvas() {
-        context.clearRect(0, 0, canvas.width, canvas.height)
-    }
+        //监控鼠标移动
+        canvas.onmousemove = function (event) {
+            var xy = window2canvas(canvas, event.clientX, event.clientY);
+            if (pan.draw) {
+                context.lineTo(xy.x, xy.y);
+                context.stroke();
+            }
 
-    //画笔颜色
-    function panColor(color) {
-        pan.color = color;
-    }
+        };
+        //监控鼠标点击
+        canvas.onmousedown = function (event) {
+            var xy = window2canvas(canvas, event.clientX, event.clientY);
+            pan.draw = true;
+            context.strokeStyle = pan.color;
+            context.lineWidth = pan.width;
+            context.moveTo(xy.x, xy.y);
+            context.beginPath();
+        };
+        //鼠标按键松开
+        canvas.onmouseup = function (event) {
+            pan.draw = false;
+        };
 
-    //画笔粗细
-    function panWidth(width) {
-        pan.width = pan.width + width;
-        if (pan.width <= 0) {
-            pan.width = 1;
+        /**
+         *重新计算鼠标的坐标
+         * @param canvas
+         * @param x
+         * @param y
+         * @returns {{x: number, y: number}}
+         */
+        function window2canvas(canvas, x, y) {
+            var clientRect = canvas.getBoundingClientRect();
+            return {
+                x: (x - clientRect.left) * (canvas.width / clientRect.width),
+                y: (y - clientRect.top) * (canvas.height / clientRect.height),
+            };
         }
-    }
+
+        //清空画布
+        $(".clear").on('click', function () {
+            context.clearRect(0, 0, canvas.width, canvas.height)
+        });
+        //画笔颜色
+        $('.panColor').on('click', function () {
+            var color = $(this).css("background-color");
+            pan.color = color;
+            $(this).css("background-color", color);
+        });
+        //画笔粗细
+        $('.changeWidth').on('click', function () {
+            var width = $(this).attr("width") * 1;
+            pan.width = pan.width + width;
+            if (pan.width <= 0) {
+                pan.width = 1;
+            }
+        });
+    })
 
 </script>
 </body>
