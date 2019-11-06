@@ -64,8 +64,8 @@
             var color = $(this).attr("color");
             $(this).css("background-color", "rgb(" + color + ")");
         });
-        var lineWidthHtml = "";
-        for (var i = 1; i <= 100; i += 5) {
+        var lineWidthHtml = '<option value=1>画笔宽度1</option>';
+        for (var i = 5; i <= 100; i += 5) {
             lineWidthHtml += '<option value=' + i + '>画笔宽度' + i + '</option>';
         }
         $('.lineWidth').html(lineWidthHtml);
@@ -77,7 +77,7 @@
         canvas.width = right.offsetWidth - 2;
         //获取上下文
         var context = canvas.getContext('2d');
-
+        context.strokeStyle = "rgb(0,0,0,0.1)";
         var pan = {
             draw: false
         };
@@ -89,8 +89,8 @@
                 context.lineTo(xy.x, xy.y);
                 context.stroke();
             }
-
         };
+
         //监控鼠标点击
         canvas.onmousedown = function (event) {
             var xy = window2canvas(canvas, event.clientX, event.clientY);
@@ -98,10 +98,12 @@
             context.moveTo(xy.x, xy.y);
             context.beginPath();
         };
+
         //鼠标按键松开
         canvas.onmouseup = function (event) {
             pan.draw = false;
         };
+
 
         /**
          *重新计算鼠标的坐标
